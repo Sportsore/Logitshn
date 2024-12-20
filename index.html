@@ -29,6 +29,8 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
         }
 
         label {
@@ -68,6 +70,8 @@
             padding: 15px;
             border-radius: 10px;
             word-wrap: break-word;
+            width: 90%;
+            max-width: 400px;
         }
 
         #generatedLink a {
@@ -114,7 +118,7 @@
 
     <div id="generatedLink">
         <h2>رابطك:</h2>
-        <p id="link"></p>
+        <a id="link" href="#" target="_blank"></a>
         <div id="timer"></div>
     </div>
 
@@ -168,6 +172,7 @@
 
         function displayLink(link) {
             linkElement.textContent = link;
+            linkElement.href = link;
             linkElement.style.color = "#FFD700";
             generatedLinkDiv.style.display = "block";
         }
@@ -186,6 +191,7 @@
                     timerElement.textContent = "انتهت صلاحية الرابط!";
                     linkElement.textContent = "الرابط لم يعد صالحًا.";
                     linkElement.style.color = "red";
+                    linkElement.removeAttribute("href");
                 }
 
                 timeLeft -= 1000;
